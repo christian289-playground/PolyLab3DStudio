@@ -28,6 +28,18 @@ Windows AI Foundry 등). `WebView2`는 먼저 단독 패키지
 `Microsoft.Web.WebView2.Wpf`를 검토한다. 예외에 해당하면 이 저장소에 섞지 말고
 별도 저장소로 분리한다.
 
+## 폴더 구조 규칙
+
+파일은 관심사별 폴더로 묶여 있지만 **네임스페이스는 평탄하게 유지한다**.
+`Core/Geometry/MeshData.cs`도 `namespace PolyLab3DStudio.Core`이고,
+`ViewModels/Settings/SettingsViewModel.cs`도 `namespace PolyLab3DStudio.ViewModels`다.
+폴더 이름을 네임스페이스에 반영하지 말 것 — 모든 `using`과 XAML `clr-namespace`,
+그리고 `Mappings.xaml`의 암시적 DataTemplate 매핑이 전부 깨진다.
+
+`Core/Reference/Glossary.xml`은 `LogicalName`으로 매니페스트 이름을
+`PolyLab3DStudio.Core.Glossary.xml`에 고정해 두었다(`GlossaryCatalog`가 그 이름을 찾는다).
+이 파일을 옮기면 csproj의 `LogicalName`도 함께 확인할 것.
+
 ## 메모
 
 `christian289/dotnet-with-claudecode`의 `samples/PolyLab3DStudio/`에서 분리해 왔다. 그 저장소의 WPF 규칙을 따른다: **CommunityToolkit.Mvvm + GenericHost**, ViewModel은 UI에 의존하지 않는다(`System.Windows` 참조 금지), 타깃은 `net10.0-windows`. NuGet 버전은 `Directory.Packages.props`에서 중앙 관리한다. README가 참조하는 "this repository's WPF coding rules"가 이 항목이다.

@@ -1,0 +1,168 @@
+﻿<UserControl
+    x:Class="PolyLab3DStudio.Controls.CommandList"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:PolyLab3DStudio.Controls">
+    <UserControl.Resources>
+
+        <!--  A full-line # comment: a label for the commands beneath it.  -->
+        <DataTemplate x:Key="CommentRowTemplate" DataType="{x:Type controls:CommandRow}">
+            <TextBlock
+                Margin="2,0,0,5"
+                FontFamily="{StaticResource MonoFont}"
+                FontSize="11"
+                Foreground="{StaticResource DarkMutedBrush}"
+                Text="{Binding Text}"
+                TextWrapping="Wrap" />
+        </DataTemplate>
+
+        <!--  Blank line from the source, kept so comment groups stay grouped.  -->
+        <DataTemplate x:Key="SpacerRowTemplate" DataType="{x:Type controls:CommandRow}">
+            <Border Height="9" Background="Transparent" />
+        </DataTemplate>
+
+        <!--  One command: its own horizontal scroller, its own copy button, its own toast.  -->
+        <DataTemplate x:Key="CommandRowTemplate" DataType="{x:Type controls:CommandRow}">
+            <StackPanel Margin="0,0,0,6">
+                <Border
+                    Padding="11,7,6,7"
+                    Background="{StaticResource PipelineDarkChipBrush}"
+                    BorderBrush="{StaticResource PipelineDarkChipBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!--
+                            Read-only TextBox so the line can be drag-selected; the
+                            ScrollViewer is per row, so a long command scrolls on its
+                            own without dragging its neighbours sideways.
+                        -->
+                        <ScrollViewer
+                            VerticalAlignment="Center"
+                            HorizontalScrollBarVisibility="Auto"
+                            VerticalScrollBarVisibility="Disabled">
+                            <TextBox
+                                Padding="0"
+                                AutomationProperties.Name="{Binding Text}"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                CaretBrush="Transparent"
+                                Cursor="IBeam"
+                                FontFamily="{StaticResource MonoFont}"
+                                FontSize="11.5"
+                                Foreground="{StaticResource DarkFgBrush}"
+                                HorizontalScrollBarVisibility="Disabled"
+                                IsReadOnly="True"
+                                IsReadOnlyCaretVisible="False"
+                                PreviewMouseLeftButtonUp="OnCommandMouseUp"
+                                SelectionOpacity="0.45"
+                                Text="{Binding Text, Mode=OneWay}"
+                                TextWrapping="NoWrap"
+                                VerticalScrollBarVisibility="Disabled" />
+                        </ScrollViewer>
+
+                        <TextBlock
+                            Grid.Column="1"
+                            Margin="8,0,4,0"
+                            VerticalAlignment="Center"
+                            FontSize="10.5"
+                            FontWeight="Bold"
+                            Foreground="{StaticResource GreenBrush}"
+                            IsHitTestVisible="False"
+                            Opacity="0"
+                            Tag="toast"
+                            Text="복사됨" />
+
+                        <Button
+                            Grid.Column="2"
+                            VerticalAlignment="Center"
+                            AutomationProperties.Name="명령 복사"
+                            Click="OnCopyClick"
+                            Cursor="Hand"
+                            Focusable="False"
+                            ToolTip="이 명령 복사">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border
+                                        x:Name="Chrome"
+                                        Padding="6,4"
+                                        Background="Transparent"
+                                        CornerRadius="6">
+                                        <!--  Two offset sheets: the copy glyph.  -->
+                                        <Canvas
+                                            x:Name="Glyph"
+                                            Width="13"
+                                            Height="14">
+                                            <Rectangle
+                                                Canvas.Left="0"
+                                                Canvas.Top="0"
+                                                Width="9"
+                                                Height="10"
+                                                RadiusX="2"
+                                                RadiusY="2"
+                                                Stroke="{StaticResource DarkMutedBrush}"
+                                                StrokeThickness="1.2" />
+                                            <Rectangle
+                                                Canvas.Left="3.5"
+                                                Canvas.Top="3.5"
+                                                Width="9"
+                                                Height="10"
+                                                Fill="{StaticResource PipelineDarkChipBrush}"
+                                                RadiusX="2"
+                                                RadiusY="2"
+                                                Stroke="{StaticResource DarkSoftFgBrush}"
+                                                StrokeThickness="1.2" />
+                                        </Canvas>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Chrome" Property="Background" Value="{StaticResource DarkBarHoverBrush}" />
+                                            <Setter TargetName="Glyph" Property="Opacity" Value="1" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <TextBlock
+                    Margin="12,3,0,2"
+                    FontFamily="{StaticResource MonoFont}"
+                    FontSize="10.5"
+                    Foreground="{StaticResource DarkMutedBrush}"
+                    Text="{Binding TrailingComment}"
+                    TextWrapping="Wrap">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasTrailingComment}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
+        </DataTemplate>
+
+        <controls:CommandRowTemplateSelector
+            x:Key="RowTemplateSelector"
+            CommandTemplate="{StaticResource CommandRowTemplate}"
+            CommentTemplate="{StaticResource CommentRowTemplate}"
+            SpacerTemplate="{StaticResource SpacerRowTemplate}" />
+    </UserControl.Resources>
+
+    <Border
+        Padding="12,12,12,7"
+        Background="{StaticResource DarkBarBrush}"
+        CornerRadius="10">
+        <ItemsControl x:Name="Rows" ItemTemplateSelector="{StaticResource RowTemplateSelector}" />
+    </Border>
+</UserControl>

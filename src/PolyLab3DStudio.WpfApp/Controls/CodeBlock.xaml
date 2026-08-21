@@ -1,0 +1,102 @@
+﻿<UserControl
+    x:Class="PolyLab3DStudio.Controls.CodeBlock"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Border
+        Padding="16,12,10,14"
+        Background="{StaticResource DarkBarBrush}"
+        CornerRadius="10">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!--
+                Read-only TextBox rather than TextBlock: WPF only gives mouse text
+                selection on an editable-surface control, and dragging a selection is
+                what triggers the auto-copy in CodeBlock.xaml.cs.
+            -->
+            <ScrollViewer
+                VerticalAlignment="Center"
+                HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Disabled">
+                <TextBox
+                    x:Name="CodeText"
+                    Padding="0"
+                    AcceptsReturn="True"
+                    AutomationProperties.Name="코드 블록 — 드래그하면 복사됩니다"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    CaretBrush="Transparent"
+                    Cursor="IBeam"
+                    FontFamily="{StaticResource MonoFont}"
+                    FontSize="11.5"
+                    Foreground="{StaticResource DarkSoftFgBrush}"
+                    HorizontalScrollBarVisibility="Disabled"
+                    IsReadOnly="True"
+                    IsReadOnlyCaretVisible="False"
+                    SelectionOpacity="0.45"
+                    Text="{Binding Code, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    TextWrapping="NoWrap"
+                    VerticalScrollBarVisibility="Disabled" />
+            </ScrollViewer>
+
+            <StackPanel
+                Grid.Column="1"
+                Margin="10,0,0,0"
+                VerticalAlignment="Top">
+                <Button
+                    x:Name="CopyButton"
+                    AutomationProperties.Name="코드 전체 복사"
+                    Click="OnCopyClick"
+                    Cursor="Hand"
+                    Focusable="False"
+                    ToolTip="전체 복사">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border
+                                x:Name="Chrome"
+                                Padding="9,5"
+                                Background="{StaticResource PipelineDarkChipBrush}"
+                                BorderBrush="{StaticResource PipelineDarkChipBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="7">
+                                <TextBlock
+                                    x:Name="Label"
+                                    FontSize="11"
+                                    FontWeight="SemiBold"
+                                    Foreground="{StaticResource DarkSoftFgBrush}"
+                                    Text="복사" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Chrome" Property="Background" Value="{StaticResource DarkBarHoverBrush}" />
+                                    <Setter TargetName="Label" Property="Foreground" Value="{StaticResource DarkFgBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="Label" Property="Opacity" Value="0.4" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <!--
+                    Toast. Opacity-only animation on a small element, started from
+                    code-behind so both the button and a drag-select can raise it.
+                -->
+                <TextBlock
+                    x:Name="Toast"
+                    Margin="0,6,0,0"
+                    HorizontalAlignment="Center"
+                    FontSize="10.5"
+                    FontWeight="Bold"
+                    Foreground="{StaticResource GreenBrush}"
+                    IsHitTestVisible="False"
+                    Opacity="0"
+                    Text="복사됨" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

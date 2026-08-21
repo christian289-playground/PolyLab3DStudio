@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Glossary.xml" />
+    <!-- LogicalName keeps the flat manifest name GlossaryCatalog looks up
+         (PolyLab3DStudio.Core.Glossary.xml) now that the file lives in Reference\. -->
+    <EmbeddedResource Include="Reference\Glossary.xml" LogicalName="PolyLab3DStudio.Core.Glossary.xml" />
   </ItemGroup>
 
 </Project>

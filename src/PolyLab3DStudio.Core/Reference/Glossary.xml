@@ -192,9 +192,97 @@
       <short>변하지 않을 리소스를 동결하는 WPF 최적화.</short>
       <detail>변하지 않을 리소스(재질·기하·변형)를 동결해 스레드 간 복사·동기화 비용을 없애는 WPF 최적화예요. UI 스레드→렌더 스레드 경계(DUCE 채널)를 건널 때 "다시는 안 바뀐다"는 약속이 되어 채널 트래픽이 사라집니다. 3D 데이터에 특히 효과가 커요.</detail>
     </term>
-    <term word="OBJ / STL / GLB" english="Mesh File Formats" category="파일/도구">
-      <short>대표적인 3D 메시 파일 형식들.</short>
-      <detail>OBJ는 범용 텍스트 메시, STL은 3D 프린팅 표준, GLB(glTF)는 재질·애니메이션까지 담는 현대 표준이에요. HelixToolkit의 ModelImporter가 OBJ/STL/3DS를 읽어요 — 순정 WPF에는 임포터가 없습니다.</detail>
+    <term word="교환 형식 / 전송 형식" english="Interchange / Transmission Format" category="파일/도구">
+      <short>주고받기 위한 형식과, 실어 보내기 위한 형식.</short>
+      <detail>3D 파일은 역할로 나눠 보면 쉬워요. 저작(.blend·.max)은 작업 중 상태 전부를 담고, 교환(FBX·Alembic·USD)은 부서끼리 주고받는 무겁고 표현력 높은 형식, 전송(glTF/GLB·USDZ)은 GPU에 바로 올리려고 작고 빠르게 설계한 형식, 제조(STL·3MF·STEP)는 물건을 만들기 위한 형식입니다. "어떤 형식이 제일 좋냐"가 성립하지 않는 이유예요 — STL로 영화를 만들지 않고, FBX로 프린팅하지 않습니다.</detail>
+    </term>
+    <term word="삼각형 수프" english="Triangle Soup" category="파일/도구">
+      <short>인덱스도 연결 정보도 없이 삼각형만 나열한 구조.</short>
+      <detail>삼각형마다 정점 3개를 그대로 반복해 적어, 정점을 전혀 공유하지 않는 구조예요. STL이 대표적입니다. 쓰기는 쉽지만 같은 정점이 여러 번 저장되어 용량이 커지고, 어느 면이 어느 면과 붙어 있는지 알 수 없어서 읽는 쪽이 정점을 다시 용접(weld)해야 해요. 반대는 인덱스 메시(OBJ·PLY·glTF, 그리고 WPF의 MeshGeometry3D)입니다.</detail>
+    </term>
+    <term word="B-rep" english="Boundary Representation" category="파일/도구">
+      <short>삼각형이 아니라 수식으로 곡면을 정의하는 CAD 방식.</short>
+      <detail>곡면을 삼각형으로 근사하지 않고 NURBS 같은 수식으로 정확히 정의하는 CAD 세계의 표현이에요. 아무리 확대해도 각이 지지 않고, 지름 30mm는 정확히 30mm입니다. STEP·IGES·Parasolid가 이 계열이에요. 메시 형식은 기하를 근사하고 B-rep은 서술한다 — 이 차이가 3D 파일 형식을 가르는 가장 큰 분기점입니다.</detail>
+    </term>
+    <term word="테셀레이션" english="Tessellation" category="파일/도구">
+      <short>매끄러운 곡면을 삼각형으로 쪼개는 과정.</short>
+      <detail>NURBS·서브디비전처럼 매끄럽게 정의된 면을, 실제로 그릴 수 있는 삼각형으로 쪼개는 과정이에요. CAD 모델(STEP)을 Blender나 WPF로 가져올 때 반드시 한 번 거칩니다 — MeshGeometry3D는 삼각형만 받기 때문이죠. 얼마나 잘게 쪼갤지가 곧 품질과 폴리곤 수의 트레이드오프가 돼요.</detail>
+    </term>
+    <term word="베이크" english="Bake" category="파일/도구">
+      <short>계산되던 것을 미리 구워 고정 데이터로 만드는 것.</short>
+      <detail>절차적으로 계산되던 것을 미리 계산해 고정된 데이터로 굽는 걸 말해요. 기하 쪽에서는 리그·모디파이어를 버리고 프레임마다의 정점 위치만 남기는 것(Alembic), 재질 쪽에서는 복잡한 셰이더 결과를 텍스처 이미지로 굽는 것을 뜻합니다. 유연함을 내주고 예측 가능성과 속도를 얻는 거래예요.</detail>
+    </term>
+    <term word="OBJ" english="Wavefront OBJ" category="파일/도구">
+      <short>1980년대에 태어나 아직도 가장 널리 읽히는 텍스트 메시.</short>
+      <detail>Wavefront Technologies가 자사 Advanced Visualizer용으로 1980년대 후반에 만든 줄 단위 텍스트 형식이에요. v(정점)·vt(UV)·vn(노멀)·f(면)이 거의 전부이고, 재질은 옆에 딸린 .mtl 파일에 담깁니다. 씬 계층·애니메이션·단위가 없는 대신 너무 단순해서 모든 도구가 읽어요. 인덱스가 0이 아니라 1부터 시작하는 게 파서를 처음 써 보는 사람이 반드시 걸리는 함정입니다. HelixToolkit의 ModelImporter가 OBJ/STL/3DS를 읽어요 — 순정 WPF에는 임포터가 없습니다.</detail>
+    </term>
+    <term word="STL" english="Stereolithography" category="파일/도구">
+      <short>1987년 3D 프린터와 함께 태어난 삼각형 수프.</short>
+      <detail>3D Systems가 첫 상업 스테레오리소그래피 장비를 위해 1987년에 만들었어요. 삼각형마다 노멀 1개와 정점 3개, 그게 전부입니다 — 색도 단위도 연결 정보도 없어요. 단위가 없어서 mm와 inch를 오해해 25.4배로 출력되는 사고가 영원히 반복되고, 바이너리 헤더 80바이트가 solid로 시작하면 ASCII로 오인하는 것이 모든 STL 파서의 통과의례예요. 그래도 슬라이서는 수밀(watertight) 삼각형 덩어리만 있으면 되기 때문에, 대중에게는 여전히 "3D 프린트용 파일"의 동의어입니다.</detail>
+    </term>
+    <term word="PLY" english="Stanford Polygon Format" category="파일/도구">
+      <short>스캔 데이터를 담으려 만든, 속성을 마음대로 늘리는 형식.</short>
+      <detail>1990년대 초 스탠퍼드 그래픽스 랩이 3D 스캐너 출력을 저장하려고 만들었어요. 핵심은 자기서술형 헤더입니다 — 내 파일에 어떤 속성이 있는지(예: property float confidence) 먼저 선언하면, 형식을 바꾸지 않고 정점마다 색·신뢰도·법선을 얼마든지 붙일 수 있어요. 그 확장성 덕에 스캔·사진측량·포인트 클라우드의 기본값이 되었고, 최근 가우시안 스플래팅 장면도 커스텀 속성을 담은 .ply로 유통됩니다. 스탠퍼드 버니가 이 형식으로 배포되면서 형식과 공용 테스트 모델이 함께 퍼졌어요.</detail>
+    </term>
+    <term word="glTF / GLB" english="GL Transmission Format" category="파일/도구">
+      <short>"3D의 JPEG"를 목표로 만든 현대 전송 표준.</short>
+      <detail>Khronos Group이 2015년에 1.0, 2017년에 2.0을 낸 전송용 형식이에요. .gltf는 JSON에 외부 .bin·이미지가 딸리고, .glb는 그 전부를 담은 단일 바이너리(12바이트 헤더 + JSON 청크 + BIN 청크)입니다. 우아한 지점은 accessor — 원시 바이트 버퍼를 타입이 지정된 창으로 들여다보는 구조가 GPU 정점 속성 배치와 그대로 일치해요. 2.0에서 GLSL 셰이더를 버리고 PBR 재질로 갈아탄 덕에, 버전이 오르며 오히려 단순해진 드문 규격입니다. Draco·meshopt 같은 압축은 확장으로 얹어요.</detail>
+    </term>
+    <term word="FBX" english="FiLMBOX" category="파일/도구">
+      <short>게임 파이프라인의 표준인데, 공개 규격이 없는 형식.</short>
+      <detail>이름은 몬트리올 회사 Kaydara의 모션캡처 소프트웨어 FiLMBOX에서 왔고, Alias를 거쳐 Autodesk로 넘어갔어요. 씬 계층·재질·스켈레톤·스키닝·애니메이션 곡선까지 다 담아서 Unity·Unreal이 오래 표준으로 썼습니다. 그런데 완전한 공개 스펙 없이 SDK만 제공돼요 — 그래서 Blender 같은 오픈소스 도구는 리버스 엔지니어링한 코드로 읽고, 버전마다 미묘하게 깨집니다. 2011년(버전 7100)에 바이너리 구조가 바뀌어, 그 이전 파일은 별도의 Legacy 임포터로 읽어요.</detail>
+    </term>
+    <term word="Alembic" english="Alembic (.abc)" category="파일/도구">
+      <short>리그를 버리고 결과만 프레임 단위로 구운 형식.</short>
+      <detail>Sony Pictures Imageworks와 ILM이 함께 만들어 2011년에 공개했어요. "이 캐릭터가 어떻게 움직이는가"가 아니라 "3721프레임에서 정점들이 정확히 어디 있는가"를 저장합니다. 이름은 연금술사의 증류기(alembic) — 복잡한 장면을 증류해 순수한 기하만 남긴다는 뜻이고, 단어 자체는 아랍어 al-anbiq에서 왔어요. 애니메이션 부서에서 라이팅·FX 부서로 넘길 때의 산업 표준입니다.</detail>
+    </term>
+    <term word="USD" english="Universal Scene Description" category="파일/도구">
+      <short>여러 사람이 한 장면에 겹쳐 쓰는 픽사의 합성 시스템.</short>
+      <detail>픽사가 내부 도구를 다듬어 2016년에 오픈소스로 공개했어요. 파일 형식이라기보다 장면 합성 시스템입니다 — 레이어·레퍼런스·베리언트로 여러 부서가 원본을 건드리지 않고 각자의 수정을 겹쳐 쌓아요. .usda는 사람이 읽는 텍스트, .usdc는 바이너리, .usdz는 Apple과 함께 만든 무압축 zip 패키지(iPhone에서 AR로 열리는 그것)입니다. 2023년 Pixar·Adobe·Apple·Autodesk·NVIDIA가 AOUSD를 결성해 표준화를 진행하고 있어요.</detail>
+    </term>
+    <term word="BVH" english="Biovision Hierarchy" category="파일/도구">
+      <short>메시 없이 골격과 회전값만 담는 모션캡처 텍스트.</short>
+      <detail>모션캡처 회사 Biovision이 1990년대에 만든 텍스트 형식이에요. HIERARCHY 절에 조인트 트리와 각 조인트가 몇 개의 값을 보낼지(CHANNELS)를 선언하고, MOTION 절에 프레임마다 그 순서대로 실수를 쭉 적습니다. 메시도 스킨도 없이 골격과 회전만 있어요. 오일러 각과 업축 관례(Y-up/Z-up)가 벤더마다 달라 짐벌락·축 변환 문제의 교과서적 사례이고, CMU 모션캡처 데이터베이스가 이 형식으로 풀린 덕에 오늘의 모션 생성 AI까지 이어졌습니다.</detail>
+    </term>
+    <term word="SVG" english="Scalable Vector Graphics" category="파일/도구">
+      <short>2D 벡터 파일. 커브로 가져와 돌출하면 3D가 돼요.</short>
+      <detail>1998년 W3C에 올라온 두 경쟁 제안(Adobe 진영의 PGML, Microsoft 진영의 VML)을 합성해 2001년에 표준이 됐어요. 3D 형식이 아니지만 Blender는 이걸 베지어 커브로(돌출·베벨해 입체로 만들 수 있음) 또는 그리스 펜슬 스트로크로 가져옵니다. 로고를 3D 문패로 만드는 가장 쉬운 길이고, 래스터-벡터-3D를 잇는 실질적인 다리예요.</detail>
+    </term>
+    <term word="COLLADA" english="COLLADA (.dae)" category="파일/도구">
+      <short>glTF 이전의 개방형 교환 표준. 너무 허용적이어서 무너졌어요.</short>
+      <detail>소니컴퓨터엔터테인먼트가 2004년에 내고 2006년 Khronos로 넘긴 XML 교환 형식이에요. dae는 digital asset exchange의 줄임입니다. 규격 자체는 충실했지만 같은 장면을 표현하는 방법을 너무 많이 허용해서, 도구마다 다르게 써 놓는 바람에 실무 상호운용이 무너졌어요. 같은 단체가 만든 glTF가 의도적으로 그 반대(작고 단순하고 선택지 적게)를 택한 이유입니다.</detail>
+    </term>
+    <term word="3DS" english="3D Studio (.3ds)" category="파일/도구">
+      <short>16비트 시대의 화석. 메시당 정점 65,536개 제한.</short>
+      <detail>DOS용 3D Studio(1990)의 청크 형식이에요. 메시당 정점·면 65,536개 제한과 오브젝트 이름 10자 제한이 그 시대를 그대로 보여줍니다. 지금 새로 쓸 이유는 없지만 오래된 에셋 아카이브에 아직 많이 남아 있고, HelixToolkit의 ModelImporter가 읽는 세 형식 중 하나예요.</detail>
+    </term>
+    <term word="VRML / X3D" english="Virtual Reality Modeling Language" category="파일/도구">
+      <short>glTF보다 20년 먼저 시도한 "웹에서 3D".</short>
+      <detail>VRML 1.0(1995)은 SGI의 Open Inventor 형식에서 파생됐고, 확장자 .wrl은 world의 줄임이에요. 브라우저에서 3D 세계를 걸어 다니겠다는 90년대의 꿈이었지만 대역폭과 플러그인의 벽에 막혔습니다. 후속 X3D(XML 기반)는 ISO 표준까지 갔는데도 대중화되지 못했고, 같은 목표를 20년 뒤 glTF가 이뤘어요.</detail>
+    </term>
+    <term word="3MF / AMF" english="3D Manufacturing Format" category="파일/도구">
+      <short>STL을 대체하려는 3D 프린팅 차세대 형식.</short>
+      <detail>STL의 결함(단위 없음·색 없음·연결 정보 없음)을 고치려고 나왔어요. AMF는 2011년 ASTM 표준(XML)이고, 3MF는 2015년 마이크로소프트 주도 컨소시엄의 zip+XML 형식입니다. 색·재질·단위·여러 오브젝트를 제대로 담고 용량도 작지만, 슬라이서 입장에서는 STL만으로도 일이 되기 때문에 교체가 아직 절반쯤만 진행됐어요.</detail>
+    </term>
+    <term word="STEP / IGES" english="CAD Exchange Formats" category="파일/도구">
+      <short>기계 설계의 중립 교환 형식. 삼각형이 아니라 수식이에요.</short>
+      <detail>IGES(1980)가 최초의 CAD 중립 형식이고, STEP(ISO 10303, 1994~)이 오늘의 사실상 표준입니다. 둘 다 B-rep/NURBS라 곡면이 수학적으로 정확해요. Blender와 WPF는 이들을 직접 읽지 못하니, FreeCAD·Fusion 같은 CAD 도구에서 테셀레이션해 STL·OBJ로 내보낸 뒤 가져옵니다.</detail>
+    </term>
+    <term word="DXF / DWG" english="Drawing Exchange Format" category="파일/도구">
+      <short>AutoCAD의 도면 형식. 공개된 쪽이 표준이 됐어요.</short>
+      <detail>DWG는 AutoCAD의 비공개 원본 형식이고, DXF(1982)는 남들도 읽을 수 있게 Autodesk가 공개한 교환 형식이에요. 역설적으로 공개된 DXF가 업계 공용어가 됐습니다. 대부분 2D 도면과 선 데이터라, 3D 모델링에서는 평면도를 배경으로 깔거나 커브로 가져와 돌출하는 데 써요.</detail>
+    </term>
+    <term word="OpenVDB" english="OpenVDB (.vdb)" category="파일/도구">
+      <short>연기·불·구름을 담는 희소 복셀 격자 형식.</short>
+      <detail>드림웍스 애니메이션이 2012년에 오픈소스로 공개했어요. 메시가 아니라 공간을 격자(복셀)로 채우는데, 비어 있는 영역은 저장하지 않는 희소 계층 구조라서 거대한 볼륨도 다룰 수 있습니다. 연기·불·구름처럼 표면이 없는 것들의 표준이고, 2014년 아카데미 과학기술상을 받았어요.</detail>
+    </term>
+    <term word=".blend" english="Blender File" category="파일/도구">
+      <short>자기 구조를 스스로 설명하며 덤프한 Blender 파일.</short>
+      <detail>기술적으로 가장 흥미로운 형식일 수 있어요. 본질적으로 Blender 내부 구조체의 메모리 덤프인데, 그 구조체들의 정의를 서술하는 DNA/SDNA 블록이 파일 안에 함께 들어갑니다. 그래서 최신 Blender가 아주 오래된 파일도 읽을 수 있어요. 파일이 자기 자신의 스키마를 들고 다닌다는 아이디어는 형식 설계에서 배울 만한 사례입니다.</detail>
+    </term>
+    <term word="OpenEXR" english="OpenEXR (.exr)" category="파일/도구">
+      <short>렌더 결과를 담는 업계 표준 HDR 이미지 형식.</short>
+      <detail>ILM이 2003년에 공개한 고동적범위 이미지 형식이에요. 0~1을 넘는 실제 광량을 실수로 저장해서, 렌더가 끝난 뒤에도 노출·색을 손실 없이 보정할 수 있습니다. 디퓨즈·스페큘러·깊이를 각각 다른 채널(AOV)로 담을 수 있어 합성 단계의 필수품이고, 3D 파이프라인의 출구를 담당해요.</detail>
     </term>
     <term word="포인트 클라우드" english="Point Cloud" category="파일/도구">
       <short>LiDAR·3D 스캔이 만드는 점들의 집합.</short>

@@ -1,8 +1,11 @@
 namespace PolyLab3DStudio.Core;
 
 /// <summary>
-/// The four learning courses with every lesson, mission, quiz, and reading page,
-/// transcribed verbatim from the studio design.
+/// The learning courses with every lesson, mission, quiz, and reading page.
+/// Courses c1-c4 and tracks A/B are transcribed verbatim from the studio design.
+/// Course c0 (toolchain setup) and track C (Blender to Stride) were added
+/// afterwards: they cover work done outside the app, so their lessons are
+/// reading-only — the task checker cannot observe external tools.
 /// </summary>
 public static class CourseCatalog
 {
@@ -20,6 +23,186 @@ public static class CourseCatalog
 
     private static IReadOnlyList<Course> Build() =>
     [
+        new(
+            Id: "c0", Num: "00", Title: "준비물 — 새 PC에서 시작하기", English: "SETTING UP ON A NEW PC",
+            Description: "다른 PC에서 폴리랩으로 3D 교육을 시작할 때 무엇을 설치해야 하는지 정리한 코스예요. 결론부터 말하면 코스 01~04와 트랙 A·B는 추가 설치가 필요 없고, 외부 도구는 트랙 C에서만 씁니다.",
+            Lessons:
+            [
+                new(
+                    Id: "l1", Kind: LessonKind.Reading, Title: "무엇이 필요하고, 무엇이 필요 없나", English: "WHAT YOU ACTUALLY NEED", Minutes: 5,
+                    Pages:
+                    [
+                        new(
+                            "설치가 필요 없는 구간이 대부분이에요",
+                            [
+                                "폴리랩이 실행되는 PC라면 코스 01~04(3D 공간·변형 3총사·재질과 빛·WPF로 3D 그리기)와 트랙 A(순정 WPF 3D 심화)를 처음부터 끝까지 진행할 수 있어요. 스튜디오·3D 사전·도구 지도도 마찬가지입니다. 외부 프로그램은 하나도 필요하지 않아요.",
+                                "트랙 B(DirectX 사다리)는 읽기 자료와 퀴즈로만 되어 있어요. 코드를 눈으로 읽고 판단 기준을 익히는 구간이라, 역시 아무것도 설치하지 않고 끝까지 갈 수 있습니다.",
+                                "실제로 다른 프로그램이 필요한 곳은 트랙 C 하나예요. Blender로 모델을 만들고 Stride로 옮기는 실습이라 두 도구를 설치해야 합니다. 그 설치 절차가 이 코스의 나머지 레슨입니다.",
+                                "내 PC에 무엇이 이미 깔려 있는지는 직접 확인하지 않아도 돼요. 설정 화면(시작 화면 오른쪽 위 SETTINGS)을 열면 환경 점검 카드가 있고, winget · .NET SDK · Blender · Stride 런처를 찾았는지 한눈에 보여줍니다. 도구를 설치한 뒤에는 다시 확인 버튼을 누르면 상태가 갱신돼요.",
+                            ]),
+                        new(
+                            "폴리랩 자체를 새 PC에 올리기",
+                            [
+                                "폴리랩은 .NET 10 기반 WPF 앱이라 Windows에서만 돌아가요. 소스에서 직접 빌드해 쓸 거면 .NET 10 SDK가 필요하고, 학습자에게 완성된 실행 파일만 나눠 줄 거면 .NET 10 데스크톱 런타임만 있으면 됩니다.",
+                                "교실을 준비하는 입장이라면 후자가 훨씬 편해요. 학습자 PC마다 SDK와 소스를 두는 대신, 강사 PC에서 한 번 빌드한 결과물과 런타임만 배포하면 됩니다. SDK는 약 1GB에 가깝고 런타임은 훨씬 작아요.",
+                                "런타임이 없는 PC에서 실행 파일을 열면 .NET을 설치하라는 안내 창이 뜹니다. 당황할 일은 아니지만, 교육 중에 마주치면 흐름이 끊기니 미리 깔아 두는 편이 좋아요.",
+                            ],
+                            """
+                            # 소스로 빌드해 쓸 때 (강사 PC)
+                            winget install -e --id Microsoft.DotNet.SDK.10
+                            
+                            dotnet --info                                   # 설치 확인
+
+                            dotnet build PolyLab3DStudio.slnx
+                            
+                            dotnet run --project src/PolyLab3DStudio.WpfApp/PolyLab3DStudio.WpfApp.csproj
+
+                            # 실행 파일만 배포할 때 (학습자 PC)
+                            winget install -e --id Microsoft.DotNet.DesktopRuntime.10
+                            """,
+                            Commands: true),
+                    ]),
+                new(
+                    Id: "l2", Kind: LessonKind.Reading, Title: "winget 먼저 확인하기", English: "CHECK WINGET FIRST", Minutes: 6,
+                    Pages:
+                    [
+                        new(
+                            "winget이 있는 PC인지 확인",
+                            [
+                                "winget은 Windows에 기본 탑재된 패키지 관리자예요. 앱 설치 관리자(App Installer)의 일부로 들어 있어서, Windows 11이면 대개 그냥 있습니다. Windows 10에서는 없을 수도 있어요.",
+                                "터미널을 여는 방법부터 — 키보드에서 Windows 키와 X를 함께 누르면 메뉴가 뜨고, 거기서 터미널을 고르면 됩니다. 시작 메뉴에서 terminal 이라고 검색해도 같아요. 검은 창이 열리면 준비된 것입니다.",
+                                "그 창에 winget --version 을 입력하고 Enter를 누르세요. 버전 번호가 나오면 준비가 끝난 것이고, 명령을 찾을 수 없다는 오류가 나면 Microsoft Store에서 앱 설치 관리자를 설치하면 됩니다.",
+                                "winget이 준비되면 그다음부터는 도구 이름을 몰라도 됩니다. 이 코스가 알려주는 패키지 ID를 그대로 붙여 넣으면 되니까요.",
+                            ],
+                            """
+                            winget --version
+                            
+                            # > v1.29.280      ← 이런 식으로 나오면 준비 완료
+
+                            # 오류가 난다면: Microsoft Store에서 "앱 설치 관리자" 검색해 설치
+                            # (패키지 ID: Microsoft.AppInstaller)
+                            """,
+                            Commands: true),
+                        new(
+                            "여러 PC를 똑같이 맞추는 옵션",
+                            [
+                                "교실에서는 PC마다 버전이 다르면 곤란해요. 화면 구성이 달라지고, 어떤 PC에서만 되는 기능이 생기면 수업이 멈춥니다. -e 옵션으로 패키지 ID를 정확히 일치시키고 --version 으로 버전을 고정하면 어느 PC에서든 같은 것이 설치됩니다.",
+                                "무인 설치 플래그를 붙이면 확인 프롬프트 없이 진행돼서 여러 대를 순서대로 세팅할 때 좋아요. --scope 로 사용자 단위와 기기 단위를 고를 수 있고, 기기 단위 설치는 관리자 권한이 필요합니다.",
+                            ],
+                            """
+                            # 버전을 고정해 모든 PC를 동일하게
+                            winget install -e --id BlenderFoundation.Blender.LTS.4.5 --version 4.5.10
+
+                            # 프롬프트 없이 조용히 설치 (여러 대 세팅용)
+                            winget install -e --id BlenderFoundation.Blender --silent --accept-package-agreements --accept-source-agreements
+
+                            # 기기 단위 설치 (관리자 권한 필요)
+                            winget install -e --id Microsoft.DotNet.SDK.10 --scope machine
+                            """,
+                            Commands: true),
+                        new(
+                            "winget을 쓸 수 없는 환경이라면",
+                            [
+                                "학교나 회사 PC는 정책으로 winget이나 Microsoft Store가 막혀 있을 수 있어요. 그럴 때도 길은 남아 있습니다 — 각 도구의 공식 사이트에서 설치 파일을 직접 받으면 돼요. Blender는 blender.org, Stride는 stride3d.net, .NET은 dotnet.microsoft.com입니다.",
+                                "관리자 권한이 아예 없는 PC라면 Blender의 포터블(zip) 배포가 가장 확실해요. 설치 과정 없이 압축만 풀고 blender.exe를 실행하면 됩니다. USB에 담아 여러 PC를 돌 수도 있어요.",
+                                "다만 Stride에는 이런 무설치 방식이 없습니다. Stride까지 실습해야 하는데 권한이 없다면, 강사 PC 한 대에서 시연하는 방식으로 계획을 잡는 편이 현실적이에요.",
+                            ]),
+                    ]),
+                new(
+                    Id: "l3", Kind: LessonKind.Reading, Title: "Blender 설치와 첫 실행 확인", English: "INSTALLING BLENDER", Minutes: 8,
+                    Pages:
+                    [
+                        new(
+                            "최신판이냐 LTS냐",
+                            [
+                                "winget에는 Blender 최신판과 LTS(장기 지원)판이 따로 올라와 있어요. 혼자 배우는 중이라면 최신판으로 충분하고, 여러 PC를 맞춰야 하거나 교재 화면과 똑같이 보이는 것이 중요하다면 LTS를 고르세요.",
+                                "LTS는 큰 변화 없이 오래 유지되는 버전이라, 수업 중간에 UI가 바뀌어 당황할 일이 적어요. 설치 후에는 winget list 로 실제 설치된 버전을 확인하는 습관을 들이면 좋습니다.",
+                                "설치가 끝나면 폴리랩의 설정 화면에서 환경 점검 카드의 다시 확인을 눌러 보세요. Blender 줄이 확인됨으로 바뀌고 찾아낸 blender.exe의 전체 경로가 표시됩니다 — 다음 페이지에서 쓸 경로가 바로 그것이에요.",
+                            ],
+                            """
+                            winget install -e --id BlenderFoundation.Blender           # 최신판
+                            
+                            winget install -e --id BlenderFoundation.Blender.LTS.4.5   # LTS
+
+                            winget list --id BlenderFoundation.Blender                  # 설치 확인
+                            """,
+                            Commands: true),
+                        new(
+                            "PATH에 등록되지 않는다는 함정",
+                            [
+                                "winget으로 설치해도 blender.exe는 PATH에 등록되지 않아요. 터미널에서 blender 라고 치면 명령을 찾을 수 없다는 오류가 납니다. 설치가 잘못된 게 아니라 원래 그렇습니다.",
+                                "메뉴에서 아이콘을 눌러 GUI로만 쓸 거면 아무 문제가 없어요. 하지만 트랙 C에서 파이썬 스크립트를 화면 없이(headless) 실행할 때는 blender.exe의 전체 경로가 필요합니다.",
+                                "설치 위치는 보통 C:\\Program Files\\Blender Foundation\\Blender <버전> 폴더예요. 버전 번호가 폴더 이름에 들어가니, Blender를 올린 뒤에는 경로도 함께 바뀐다는 점을 기억하세요.",
+                            ],
+                            """
+                            where.exe blender
+                            
+                            # > 지정된 파일을 찾을 수 없습니다   ← PATH에 없는 것이 정상
+
+                            # 전체 경로로 버전 확인
+                            "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" --version
+
+                            # 화면 없이 스크립트만 실행 (트랙 C에서 사용)
+                            "C:\Program Files\Blender Foundation\Blender 5.2\blender.exe" --background --python make_tower.py
+                            """,
+                            Commands: true),
+                        new(
+                            "첫 실행에서 확인할 세 가지",
+                            [
+                                "하나, 처음 열면 스플래시 화면에 버전이 표시돼요. 교실 전체가 같은 숫자인지 여기서 확인하는 게 가장 빠릅니다.",
+                                "둘, 상단 탭 맨 오른쪽에 Scripting이 있는지 보세요. 트랙 C에서 파이썬을 쓰는 화면이고, 없으면 버전이 너무 낮은 것입니다.",
+                                "셋, 뷰포트가 검게 나오거나 실행 직후 종료되면 대개 그래픽 드라이버나 GPU 문제예요. Blender는 비교적 최신 그래픽 API를 요구하므로 오래된 내장 GPU에서는 드라이버 업데이트가 먼저입니다. 정확한 요구사항은 blender.org의 download/requirements 페이지에서 확인하세요.",
+                                "미리 알아 두면 좋은 것 하나 — Blender는 Z가 위인 좌표계를 씁니다. 폴리랩과 WPF는 Y가 위예요. 3D 사전의 축 항목에 정리되어 있고, 트랙 C에서 모델이 누워서 들어오는 이유가 바로 이 차이입니다.",
+                            ]),
+                    ]),
+                new(
+                    Id: "l4", Kind: LessonKind.Reading, Title: "Stride 설치 (트랙 C 후반에만 필요)", English: "INSTALLING STRIDE", Minutes: 6,
+                    Pages:
+                    [
+                        new(
+                            "winget에 없는 도구",
+                            [
+                                "Stride만은 winget으로 설치할 수 없어요. winget search stride 를 실행하면 이름만 비슷한 무관한 프로그램이 나올 뿐입니다. 공식 배포 경로는 stride3d.net의 StrideSetup.exe(약 55MB)예요.",
+                                "그리고 StrideSetup.exe가 설치하는 것은 엔진이 아니라 Stride 런처입니다. 런처를 실행해 엔진 버전을 골라 설치하면 씬 에디터인 Game Studio가 함께 깔려요. 즉 설치가 두 단계입니다 — 런처를 깔고, 런처로 엔진을 깔아요.",
+                                "엔진 본체는 용량이 크니 디스크 여유를 미리 확인하세요. 그리고 Stride는 Windows 전용이에요(다른 OS는 실험 단계). 설치 안내 문서는 doc.stride3d.net의 get-started/install-stride 페이지입니다.",
+                            ],
+                            """
+                            winget search stride
+                            
+                            # > mousestride   trustbe.mousestride   ← 전혀 다른 프로그램
+
+                            # 대신 stride3d.net/download 에서 StrideSetup.exe (약 55MB)
+
+                            # 런처가 설치되는 위치
+                            %LOCALAPPDATA%\Programs\Stride\Stride.Launcher.exe
+
+                            # 런처 실행 → 엔진 버전 선택 설치 → Game Studio 열기
+                            """,
+                            Commands: true),
+                        new(
+                            "여기까지 안 해도 되는 경우",
+                            [
+                                "교육 일정이 짧다면 Stride는 건너뛸 수 있어요. 트랙 C의 앞 두 레슨(파이썬으로 모델 만들기, 파일로 내보내기)은 Blender만 있으면 끝까지 진행됩니다. 그 두 레슨만으로도 3D 파일 형식과 축·단위 문제를 충분히 겪을 수 있어요.",
+                                "스크립트를 컴파일하는 것 자체는 .NET SDK만으로도 됩니다. 하지만 씬에 모델을 올리고 스크립트를 컴포넌트로 붙이는 일은 Game Studio에서 해야 해요. 그래서 트랙 C의 마지막 레슨을 학습자가 직접 실습하려면 런처 설치를 건너뛸 수 없습니다.",
+                                "권한이나 시간이 부족하면 마지막 레슨만 강사 PC에서 시연하는 방식도 좋은 타협이에요. 파이프라인의 결말을 눈으로 보는 것만으로도 앞 레슨들의 이유가 분명해집니다.",
+                            ]),
+                    ]),
+                new(
+                    Id: "q", Kind: LessonKind.Quiz, Title: "개념 체크: 준비물", English: "QUIZ", Minutes: 4,
+                    Questions:
+                    [
+                        new("코스 01~04와 트랙 A를 진행하려면 추가로 설치해야 하는 프로그램은?", ["없음 — 폴리랩만으로 끝까지 진행된다", "Blender", "Stride"], 0,
+                            "외부 도구가 필요한 구간은 트랙 C 하나뿐이에요."),
+                        new("새 PC에 winget이 있는지 확인하는 명령은?", ["winget --version", "winget check", "winget --exists"], 0,
+                            "버전이 나오면 준비 완료, 오류가 나면 Microsoft Store에서 앱 설치 관리자를 설치하세요."),
+                        new("여러 PC에 똑같은 Blender 버전을 설치하려면?", ["-e로 ID를 정확히 맞추고 --version으로 버전을 고정", "설치할 때마다 최신판을 받는다", "PC마다 다른 버전을 써도 무관하다"], 0,
+                            "교실에서 화면이 서로 다르면 수업이 멈춰요. LTS + 버전 고정이 안전합니다."),
+                        new("winget으로 Blender를 설치한 뒤 터미널에서 blender 명령이 동작하지 않는 이유는?", ["PATH에 등록되지 않아서 — 전체 경로를 써야 한다", "설치가 실패한 것이다", "관리자 권한이 없어서"], 0,
+                            "정상 동작이에요. headless 실행에는 blender.exe의 전체 경로가 필요합니다."),
+                        new("학습자 PC에 완성된 폴리랩 실행 파일만 배포할 때 필요한 것은?", [".NET 10 데스크톱 런타임", ".NET 10 SDK", "Visual Studio"], 0,
+                            "SDK는 빌드하는 강사 PC에만 있으면 되고, 실행에는 런타임만 필요해요."),
+                    ]),
+            ]),
         new(
             Id: "c1", Num: "01", Title: "3D 공간과 친해지기", English: "MEET THE 3D SPACE",
             Description: "3D 작업의 절반은 \"잘 보는 것\"이에요. 카메라를 자유롭게 움직이고, 첫 오브젝트를 만들어 봅니다.",
@@ -620,7 +803,7 @@ public static class CourseCatalog
                             "Vortice/Silk.NET 직접 제어, 그리고 Stride",
                             [
                                 "셰이더·버퍼·파이프라인 스테이트를 손수 설정하는 저수준 제어는 엔진을 직접 만들거나 최신 GPU 기능을 쓸 때의 길이에요. B-3에서 놓은 브릿지의 연장선입니다.",
-                                "Stride는 .NET Foundation의 오픈소스 3D 게임 엔진(씬 에디터·PBR·물리 완비)이에요. 다만 이건 WPF에 삽입하는 게 아니라 독립 엔진 — \"3D가 앱의 일부\"가 아니라 \"경험 전체\"일 때 선택지이고, 이 커리큘럼의 범위 밖 참고입니다.",
+                                "Stride는 .NET Foundation의 오픈소스 3D 게임 엔진(씬 에디터·PBR·물리 완비)이에요. 다만 이건 WPF에 삽입하는 게 아니라 독립 엔진 — \"3D가 앱의 일부\"가 아니라 \"경험 전체\"일 때의 선택지입니다. 실제로 설치하고 Blender에서 만든 모델을 올려 C#으로 움직여 보는 것은 트랙 C에서 다뤄요.",
                                 "학습 사다리 정리: ① 순정 Media3D로 원리 → ② HelixToolkit.Wpf로 편의 → ③ HelixToolkit.SharpDX로 품질·성능(DX11 천장) → ④ Vortice/Silk.NET로 DX12·최대 제어 → ⑤ Stride로 엔진 위에서. 계단마다 같은 눈사람 장면을 다시 만들어 보세요 — 도구가 바뀌어도 개념은 그대로임을 체득하게 됩니다.",
                             ]),
                     ]),
@@ -636,6 +819,154 @@ public static class CourseCatalog
                             "D3D11·D3D12·DXGI·DXR·D3D11On12를 모두 지원하고 활발히 유지보수돼요. Silk.NET도 대안입니다."),
                         new("HwndHost 방식으로 DX12를 띄울 때의 대표적 제약은?", ["에어스페이스 — 그 위에 WPF 요소를 못 얹음", "OBJ 임포트가 안 됨", "카메라를 쓸 수 없음"], 0,
                             "DX12가 자기 HWND에 직접 그리는 대신, WPF와의 합성을 포기하는 트레이드오프예요."),
+                    ]),
+            ]),
+        new(
+            Id: "tc", Num: "C", Title: "트랙 C · Blender에서 Stride까지", English: "THE BLENDER-TO-STRIDE PIPELINE",
+            Description: "트랙 B 사다리의 마지막 칸(⑤ Stride)을 실제로 걸어 보는 트랙이에요. 파이썬으로 모델을 만들고(Blender), 파일로 내보내고(FBX·GLB), 엔진에서 C#으로 제어합니다(Stride). 폴리랩 밖의 도구를 쓰는 유일한 트랙이니, 설치가 안 되어 있다면 코스 00을 먼저 보세요.",
+            Lessons:
+            [
+                new(
+                    Id: "c1", Kind: LessonKind.Reading, Title: "Blender Scripting — 파이썬으로 모델 띄우기", English: "BUILDING A MESH WITH BPY", Minutes: 10,
+                    Pages:
+                    [
+                        new(
+                            "Scripting 워크스페이스",
+                            [
+                                "Blender 상단 탭의 맨 오른쪽 Scripting을 누르면 파이썬 콘솔·텍스트 에디터·Info 로그가 한 화면에 나와요. 에디터에 코드를 쓰고 Alt+P로 실행하면 결과가 그 즉시 3D 뷰포트에 나타납니다.",
+                                "핵심은 이겁니다 — Blender에서 마우스로 하는 모든 조작은 bpy API 호출과 1:1로 대응해요. Info 로그에 방금 한 조작의 파이썬 코드가 그대로 찍히니, 손으로 한 번 해 보고 그 코드를 복사하는 것이 가장 빠른 학습법입니다.",
+                            ]),
+                        new(
+                            "폴리랩의 MeshFactory와 똑같은 일",
+                            [
+                                "from_pydata(정점 목록, 엣지 목록, 면 인덱스 목록)은 정점 배열과 면 인덱스를 그대로 넘겨 메시를 만드는 함수예요. 폴리랩의 MeshFactory가 Point3를 쌓고 AddTriangle로 인덱스를 적는 것과 완전히 같은 일을 합니다.",
+                                "도구가 Blender든 WPF든, 메시의 정의는 정점 + 인덱스라는 사실이 변하지 않아요. 트랙 A에서 배운 와인딩 순서도 여기서 그대로 통합니다 — 면 인덱스를 반대로 적으면 노멀이 뒤집혀요.",
+                                "objects.link(obj)를 호출하는 순간 오브젝트가 장면에 들어가 뷰포트에 보입니다. 그 앞까지는 데이터만 존재하고 화면에는 없어요 — 폴리랩에서 MeshGeometry3D를 만들어도 ModelVisual3D로 Viewport3D에 넣기 전까지 안 보이는 것과 같은 구조입니다.",
+                            ],
+                            """
+                            import bpy
+
+                            bpy.ops.wm.read_factory_settings(use_empty=True)   # 빈 장면에서 시작
+
+                            # 정점과 면 인덱스를 직접 넘겨 메시를 만든다
+                            mesh = bpy.data.meshes.new("TowerMesh")
+                            verts = [(-.5, -.5, 0), (.5, -.5, 0), (.5, .5, 0), (-.5, .5, 0),
+                                     (-.3, -.3, 1.4), (.3, -.3, 1.4), (.3, .3, 1.4), (-.3, .3, 1.4)]
+                            faces = [(0, 1, 2, 3), (7, 6, 5, 4), (0, 4, 5, 1),
+                                     (1, 5, 6, 2), (2, 6, 7, 3), (3, 7, 4, 0)]
+                            mesh.from_pydata(verts, [], faces)
+                            mesh.update()
+
+                            obj = bpy.data.objects.new("Tower", mesh)
+                            bpy.context.collection.objects.link(obj)   # 이 순간 뷰포트에 나타난다
+
+                            # 모디파이어와 변형도 전부 스크립트로
+                            obj.modifiers.new(name="Bevel", type="BEVEL").width = 0.03
+                            obj.rotation_euler = (0, 0, 0.6)
+                            """),
+                    ]),
+                new(
+                    Id: "c2", Kind: LessonKind.Reading, Title: "내보내기 — FBX와 GLB 사이에서", English: "EXPORTING THE MODEL", Minutes: 8,
+                    Pages:
+                    [
+                        new(
+                            "내보내기도 한 줄이에요",
+                            [
+                                "메뉴의 File > Export에 있는 항목들은 모두 오퍼레이터 호출이라, 스크립트에서 그대로 부를 수 있어요. FBX와 glTF는 export_scene 계열이고, OBJ·STL·PLY는 wm 계열의 새 이름을 씁니다.",
+                                "재미있는 실험 하나 — 앞 레슨에서 만든 정점 8개짜리 상자를 두 형식으로 내보내면 FBX는 약 11,800바이트, GLB는 약 1,500바이트가 나옵니다. 같은 모양인데 8배 차이예요. FBX가 담는 부가 정보가 그만큼 많고 형식이 무겁다는 뜻입니다.",
+                            ],
+                            """
+                            # FBX — 스켈레톤·애니메이션까지 확실하게
+                            bpy.ops.export_scene.fbx(filepath=r"C:\out\tower.fbx", use_selection=False)
+
+                            # GLB — 열린 규격, PBR 재질이 규격에 내장
+                            bpy.ops.export_scene.gltf(filepath=r"C:\out\tower.glb", export_format="GLB")
+
+                            # 그 밖에
+                            bpy.ops.wm.obj_export(filepath=r"C:\out\tower.obj")
+                            bpy.ops.wm.stl_export(filepath=r"C:\out\tower.stl")
+
+                            # 같은 8정점 상자 결과: FBX 11,820 bytes / GLB 1,484 bytes
+                            """),
+                        new(
+                            "축과 단위 — 모델이 누워서 들어오는 이유",
+                            [
+                                "Blender는 Z가 위인 좌표계인데 FBX와 glTF는 Y가 위인 것이 관례예요. 그래서 내보내기 단계에서 축 변환이 일어납니다. 엔진에서 모델이 옆으로 누워 있거나 90도 돌아가 있으면, 재질이나 메시가 아니라 이 업축 변환부터 확인하세요.",
+                                "단위도 같은 함정이에요. Blender의 1은 기본적으로 1미터인데 형식과 도구마다 해석이 달라서, 모델이 1000배 크거나 작게 들어오는 일이 흔합니다.",
+                                "무엇을 고를까: 캐릭터 스켈레톤과 애니메이션을 함께 넘겨야 하면 FBX가 여전히 가장 확실합니다. 정적 모델과 PBR 재질이 목적이면 GLB가 더 가볍고, 규격이 공개되어 있어 도구 간 결과가 일관돼요. Stride는 둘 다 읽으니 강제되는 선택은 없습니다.",
+                            ]),
+                    ]),
+                new(
+                    Id: "c3", Kind: LessonKind.Reading, Title: "Stride — 가져오기와 C# 제어", English: "IMPORT AND CONTROL IN STRIDE", Minutes: 10,
+                    Pages:
+                    [
+                        new(
+                            "끌어다 놓으면 에셋이 된다",
+                            [
+                                "Game Studio의 Asset View에 파일을 끌어다 놓으면 Stride의 에셋 파이프라인이 모델·재질·텍스처 에셋으로 컴파일해요. 원본 파일을 매번 파싱하는 게 아니라, 엔진이 바로 올릴 수 있는 형태로 미리 굽는(bake) 구조입니다.",
+                                "Stride 4.3의 모델 임포터는 Assimp 기반 통합 임포터(Stride.Importer.3D)라서 예전처럼 Autodesk FBX SDK를 따로 설치하지 않아도 돼요. 읽는 확장자 목록에 .blend가 직접 들어 있는 것도 눈에 띕니다 — 급할 때는 내보내기 없이 .blend를 바로 던져 볼 수 있어요.",
+                            ],
+                            """
+                            Stride 4.3 모델 임포터가 읽는 확장자
+                            (Stride.Assets.Models 어셈블리에 선언된 목록)
+
+                            .dae  .3ds  .gltf  .glb  .obj  .blend  .x
+                            .md2  .md3  .dxf   .ply  .stl  .stp    .fbx
+                            """),
+                        new(
+                            "SyncScript — 매 프레임 불리는 Update()",
+                            [
+                                "Stride에서 오브젝트를 제어하는 기본 방법은 SyncScript를 상속한 클래스를 만들고 Update()를 채우는 거예요. 그 스크립트를 Game Studio에서 엔티티에 컴포넌트로 붙이면, 매 프레임 Update()가 호출됩니다.",
+                                "구조가 익숙할 겁니다 — Entity.Transform.Rotation에 회전을 곱해 쌓는 것은 폴리랩에서 Transform3DGroup에 RotateTransform3D를 넣는 것과 같은 개념이고, 짐벌락을 피하려 Quaternion을 쓰는 이유도 트랙 A에서 배운 그대로예요.",
+                                "다른 점은 시간입니다. Game.UpdateTime.Elapsed로 지난 프레임의 경과 시간(델타 타임)을 받아 곱해 줘야, 프레임 레이트가 달라도 같은 속도로 움직여요. 이걸 빼먹으면 빠른 PC에서 모델이 미친 듯이 돕니다.",
+                            ],
+                            """
+                            using Stride.Core.Mathematics;
+                            using Stride.Engine;
+                            using Stride.Input;
+
+                            public class SpinModel : SyncScript   // 매 프레임 Update()가 불린다
+                            {
+                                public float Speed { get; set; } = 1.0f;
+
+                                public override void Update()
+                                {
+                                    float dt = (float)Game.UpdateTime.Elapsed.TotalSeconds;
+
+                                    // 델타 타임을 곱해야 프레임 레이트와 무관하게 같은 속도
+                                    Entity.Transform.Rotation *= Quaternion.RotationY(Speed * dt);
+
+                                    if (Input.IsKeyDown(Keys.Right))
+                                    {
+                                        Entity.Transform.Position += new Vector3(2f * dt, 0f, 0f);
+                                    }
+
+                                    DebugText.Print("pos = " + Entity.Transform.Position, new Int2(20, 20));
+                                }
+                            }
+                            """),
+                        new(
+                            "그래서 언제 이 길을 가나",
+                            [
+                                "판단 기준은 트랙 B와 같아요. 3D가 앱의 한 부분이면(대시보드 안의 3D 뷰, 설비 시각화, 뷰어) WPF에 남는 것이 낫습니다. 3D가 경험의 전체라면 엔진으로 올라오세요.",
+                                "폴리랩 자신은 이 파일들을 읽지 못합니다. 순정 WPF에는 임포터가 없고, 폴리랩의 장면은 코드로 생성한 프리미티브(ShapeKind)로만 만들어져 있어요. 그건 결함이 아니라 역할 분담입니다 — 폴리랩은 개념을 손으로 만져 보는 실험실이고, Stride는 완성품을 올리는 무대예요.",
+                                "이 트랙을 한 문장으로: 파이썬으로 만들고(Blender) → 파일로 굳히고(FBX·GLB) → C#으로 움직인다(Stride). 세 단계 모두에서 다루는 것은 결국 정점·인덱스·변형·재질 — 트랙 A에서 순정 API로 이미 겪은 그 개념들입니다.",
+                            ]),
+                    ]),
+                new(
+                    Id: "q", Kind: LessonKind.Quiz, Title: "개념 체크: 트랙 C 종합", English: "QUIZ", Minutes: 4,
+                    Questions:
+                    [
+                        new("Blender에서 Stride로 넘길 때 FBX 대신 GLB를 고르면 얻는 것은?", ["열린 규격이라 도구 간 결과가 일관되고 파일이 가볍다", "애니메이션을 더 많이 담을 수 있다", "Stride가 GLB만 읽는다"], 0,
+                            "스켈레톤 애니메이션이 필요하면 FBX가 확실하고, 정적 모델과 PBR 재질이면 GLB가 가볍고 일관돼요. Stride는 둘 다 읽습니다."),
+                        new("Blender에서 정점 배열과 면 인덱스를 직접 넘겨 메시를 만드는 함수는?", ["mesh.from_pydata", "bpy.ops.mesh.build", "mesh.load_vertices"], 0,
+                            "폴리랩 MeshFactory가 Point3를 쌓고 AddTriangle을 부르는 것과 같은 일을 한 번에 합니다."),
+                        new("Stride 4.3의 모델 임포터가 Assimp 기반으로 통합되면서 달라진 점은?", ["FBX SDK를 따로 설치하지 않아도 FBX·GLB·OBJ 등을 함께 읽는다", "FBX만 읽게 되었다", "임포트 기능이 없어졌다"], 0,
+                            "Stride.Importer.3D 하나가 .fbx·.gltf·.glb·.obj·.ply·.blend 등을 모두 담당해요."),
+                        new("Blender에서 내보낸 모델이 엔진에서 누워 있을 때 가장 먼저 볼 곳은?", ["업축 변환 (Blender Z-up ↔ FBX·glTF Y-up)", "재질의 거칠기 값", "카메라의 화각"], 0,
+                            "축 관례가 도구마다 달라서 생기는 가장 흔한 사고예요. 단위 배율도 같은 부류의 함정입니다."),
+                        new("Stride의 Update()에서 델타 타임(Game.UpdateTime.Elapsed)을 곱하지 않으면?", ["프레임 레이트가 높은 PC에서 훨씬 빠르게 움직인다", "아무 차이가 없다", "컴파일되지 않는다"], 0,
+                            "프레임당 같은 양을 더하므로 초당 프레임 수만큼 속도가 달라져요. 시간 기반으로 움직여야 합니다."),
                     ]),
             ]),
     ];

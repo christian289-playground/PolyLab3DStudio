@@ -164,7 +164,7 @@ public sealed partial class ShellViewModel : ObservableObject
 
         (Course Course, int LessonIndex)? next = FindNext();
         ContinueSub = next is { } n
-            ? $"코스 {CourseCatalog.All.ToList().IndexOf(n.Course) + 1} · {n.Course.Lessons[n.LessonIndex].Title}"
+            ? $"코스 {n.Course.Num} · {n.Course.Lessons[n.LessonIndex].Title}"
             : "모든 코스 완료! 자유 모드로";
     }
 
@@ -202,6 +202,10 @@ public sealed partial class ShellViewModel : ObservableObject
     public void GoSettings()
     {
         _returnKey = _screenKey;
+
+        // Re-probe on every visit so a tool installed while the app was open shows up
+        // without the user having to press 다시 확인.
+        Settings.RefreshTools();
         SetScreen("settings", Settings);
     }
 

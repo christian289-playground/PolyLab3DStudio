@@ -26,6 +26,8 @@ public sealed partial class ReadingViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(Paragraphs))]
     [NotifyPropertyChangedFor(nameof(Code))]
     [NotifyPropertyChangedFor(nameof(HasCode))]
+    [NotifyPropertyChangedFor(nameof(HasCommands))]
+    [NotifyPropertyChangedFor(nameof(HasSourceCode))]
     [NotifyPropertyChangedFor(nameof(PrevEnabled))]
     [NotifyPropertyChangedFor(nameof(NextLabel))]
     [ObservableProperty] private int _page;
@@ -39,6 +41,12 @@ public sealed partial class ReadingViewModel : ObservableObject
     public string? Code => Page < Pages.Count ? Pages[Page].Code : null;
 
     public bool HasCode => !string.IsNullOrEmpty(Code);
+
+    /// <summary>Code is a terminal command list — render one copyable row per command.</summary>
+    public bool HasCommands => HasCode && Page < Pages.Count && Pages[Page].Commands;
+
+    /// <summary>Code is a source snippet — render it as one block.</summary>
+    public bool HasSourceCode => HasCode && !HasCommands;
 
     public bool PrevEnabled => Page > 0;
 

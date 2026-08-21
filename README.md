@@ -6,6 +6,36 @@ implemented 1:1 from the Claude Design file `폴리랩 3D 스튜디오.dc.html`
 It follows this repository's WPF coding rules (CommunityToolkit.Mvvm +
 GenericHost, UI-independent ViewModels, `net10.0-windows`).
 
+## 시작하기 (Getting Started)
+
+This is the only step that cannot live inside the app — everything after
+launching it is taught by the curriculum itself (코스 00).
+
+**Requirements:** Windows 10 or 11. The app is WPF (`net10.0-windows`), so
+Windows only.
+
+```powershell
+# 1. Prerequisites — .NET 10 SDK to build from source, Git to clone
+winget install -e --id Microsoft.DotNet.SDK.10
+winget install -e --id Git.Git
+dotnet --info                      # confirm the SDK is on PATH
+
+# 2. Get the source and run
+git clone <this-repository>
+cd PolyLab3DStudio
+dotnet run --project src/PolyLab3DStudio.WpfApp
+```
+
+If `winget` itself is missing (some Windows 10 installs), get **앱 설치 관리자**
+(`Microsoft.AppInstaller`) from the Microsoft Store first. To hand learners a
+built app instead of the source, they only need the runtime —
+`winget install -e --id Microsoft.DotNet.DesktopRuntime.10`.
+
+**Then press "이어서 학습하기" on the start screen.** With no saved progress it
+opens **코스 00 · 준비물** — the curriculum's own setup course, which covers
+winget, Blender, and Stride installation for the later tracks. From that point
+on the app guides the whole path; nothing here needs to be explained again.
+
 ## Screens & Features
 
 - **시작 화면** — hero copy, "이어서 학습하기" (jumps to the next unfinished
@@ -13,15 +43,17 @@ GenericHost, UI-independent ViewModels, `net10.0-windows`).
   (2×2 dark cards linking the four reference screens: 도구 개념 가이드 /
   3D 사전 / WPF 코어 파이프라인 / .NET 3D 도구 지도), overall progress bar,
   and an auto-spinning snowman demo scene.
-- **학습 코스** — 6 courses × 30 units: courses 01–04 (레슨/미션/퀴즈/이론)
-  plus two advanced tracks — **트랙 A · 순수 WPF 3D 심화** (9 readings +
-  comprehensive quiz: hand-built meshes, material layers, all four lights,
-  transform order/gimbal lock, scene graph, projection, animation, picking,
-  the honest ceiling) and **트랙 B · Windows용 .NET 3D 도구** (4 readings +
-  quiz: HelixToolkit.Wpf, Helix.SharpDX/DX11, the DX12 bridge, low-level &
-  engines). Per-course progress, **quiz modal** (answer reveal, explanations,
-  score) and **reading modal** (paged theory with code blocks teaching WPF 3D
-  itself).
+- **학습 코스** — 8 courses × 39 units: **코스 00 · 준비물** (toolchain setup:
+  what needs no install at all, winget, Blender, Stride), courses 01–04
+  (레슨/미션/퀴즈/이론), plus three advanced tracks — **트랙 A · 순수 WPF 3D
+  심화** (9 readings + comprehensive quiz: hand-built meshes, material layers,
+  all four lights, transform order/gimbal lock, scene graph, projection,
+  animation, picking, the honest ceiling), **트랙 B · Windows용 .NET 3D 도구**
+  (4 readings + quiz: HelixToolkit.Wpf, Helix.SharpDX/DX11, the DX12 bridge,
+  low-level & engines) and **트랙 C · Blender에서 Stride까지** (3 readings +
+  quiz: bpy scripting, FBX/GLB export, importing and driving the model from C#).
+  Per-course progress, **quiz modal** (answer reveal, explanations, score) and
+  **reading modal** (paged theory with code blocks teaching WPF 3D itself).
 - **스튜디오** — dark app bar (undo/redo, XAML export), ribbon toolbar
   (Q/W/E/R tools · 6 solid shapes · 3 point clouds · duplicate/delete),
   scene dock, orbit-camera viewport (presets 앞/위/옆/입체, click select,
@@ -44,7 +76,7 @@ GenericHost, UI-independent ViewModels, `net10.0-windows`).
   verbatim (트랙 A-3 / 트랙 B references resolve to the in-app tracks), and
   the CTA navigates to the courses screen.
 - **3D 사전** — the `3D 사전.dc.html` design merged in as an in-app screen:
-  the shared 60-term glossary (`GlossaryCatalog`, from the design's
+  the shared 82-term glossary (`GlossaryCatalog`, from the design's
   `glossary.js`) with live substring search across word/english/short/detail,
   11 category filter chips (selected chip inverts to dark), a live "N개 용어"
   count, a two-column card grid, and the design's empty-state message.
@@ -100,6 +132,21 @@ GenericHost, UI-independent ViewModels, `net10.0-windows`).
 | `PolyLab3DStudio.Core` | .NET Class Library | Mesh/point-cloud factories, shape & course catalogs, task checker, WPF code generator, JSON stores (no UI deps) |
 | `PolyLab3DStudio.ViewModels` | .NET Class Library | Shell/Start/Courses/Studio/Settings + quiz/reading/tutorial/export VMs (CommunityToolkit.Mvvm only) |
 | `PolyLab3DStudio.WpfApp` | WPF Application | Views (incl. the merged concept guide screen), `PolyViewport` (Viewport3D orbit camera, picking, tool drags), resources, GenericHost DI |
+
+Files are grouped into folders by concern. **Namespaces stay flat** — everything in
+Core is `PolyLab3DStudio.Core`, everything in ViewModels is
+`PolyLab3DStudio.ViewModels`, regardless of folder — so folders can be
+reorganised without touching a single `using` or XAML `clr-namespace`.
+
+```
+Core/        Geometry  Scene  Curriculum  Reference  Toolchain  Export  Storage
+ViewModels/  Shell  Start  Courses  Studio  Reference  Settings
+WpfApp/      Views  Controls  Converters  Resources
+```
+
+`Core/Reference/Glossary.xml` is embedded with an explicit `LogicalName` so the
+manifest name stays `PolyLab3DStudio.Core.Glossary.xml` that `GlossaryCatalog`
+looks up.
 
 ## Run
 
